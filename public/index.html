@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TON Mini App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #0088cc, #0066aa);
+            border-radius: 20px;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: var(--tg-theme-hint-color, #999999);
+            font-size: 14px;
+        }
+
+        .card {
+            background: var(--tg-theme-secondary-bg-color, #f8f9fa);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .wallet-info {
+            text-align: center;
+        }
+
+        .wallet-address {
+            font-family: monospace;
+            font-size: 12px;
+            background: var(--tg-theme-bg-color, #ffffff);
+            padding: 8px;
+            border-radius: 6px;
+            margin: 10px 0;
+            word-break: break-all;
+        }
+
+        .balance {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--tg-theme-link-color, #0088cc);
+            margin: 15px 0;
+        }
+
+        .button {
+            background: var(--tg-theme-button-color, #0088cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 10px;
+            transition: all 0.2s;
+        }
+
+        .button:hover {
+            opacity: 0.9;
+        }
+
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .button.secondary {
+            background: var(--tg-theme-secondary-bg-color, #f8f9fa);
+            color: var(--tg-theme-text-color, #000000);
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid var(--tg-theme-button-color, #0088cc);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--tg-theme-hint-color, #cccccc);
+            border-radius: 8px;
+            font-size: 16px;
+            background: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+        }
+
+        .status {
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .features {
+            margin-top: 20px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: var(--tg-theme-secondary-bg-color, #f8f9fa);
+            border-radius: 8px;
+        }
+
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: var(--tg-theme-link-color, #0088cc);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 18px;
+        }
+
+        .feature-content h3 {
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .feature-content p {
+            font-size: 14px;
+            color: var(--tg-theme-hint-color, #999999);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">TON</div>
+            <h1 class="title">TON Mini App</h1>
+            <p class="subtitle">在Telegram中体验TON区块链</p>
+        </div>
+
+        <div id="connectSection">
+            <div class="card">
+                <h2>连接钱包</h2>
+                <p>连接你的TON钱包开始使用</p>
+                <div style="margin: 20px 0;">
+                    <div id="tonconnect-ui"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="walletSection" class="hidden">
+            <div class="card wallet-info">
+                <h2>钱包信息</h2>
+                <div class="wallet-address" id="walletAddress"></div>
+                <div class="balance" id="balance">
+                    <span class="loading"></span> 查询余额中...
+                </div>
+                <button class="button" onclick="refreshBalance()">刷新余额</button>
+                <button class="button secondary" onclick="disconnect()">断开连接</button>
+            </div>
+
+            <div class="card">
+                <h2>发送TON</h2>
+                <div class="input-group">
+                    <label for="recipient">接收地址:</label>
+                    <input type="text" id="recipient" placeholder="输入TON地址">
+                </div>
+                <div class="input-group">
+                    <label for="amount">数量 (TON):</label>
+                    <input type="number" id="amount" placeholder="0.1" step="0.001" min="0">
+                </div>
+                <button class="button" onclick="sendTransaction()" id="sendBtn">发送</button>
+            </div>
+
+            <div id="statusMessage"></div>
+        </div>
+
+        <div class="features">
+            <h2>功能特色</h2>
+            <div class="feature-item">
+                <div class="feature-icon">🔗</div>
+                <div class="feature-content">
+                    <h3>TON Connect</h3>
+                    <p>安全连接TON钱包</p>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">💰</div>
+                <div class="feature-content">
+                    <h3>余额查询</h3>
+                    <p>实时查看TON余额</p>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">💸</div>
+                <div class="feature-content">
+                    <h3>转账功能</h3>
+                    <p>快速发送TON代币</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 初始化Telegram Web App
+        const tg = window.Telegram?.WebApp;
+        if (tg) {
+            tg.ready();
+            tg.expand();
+            tg.MainButton.hide();
+        }
+
+        // 初始化TON Connect
+        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+            manifestUrl: './tonconnect-manifest.json',
+            buttonRootId: 'tonconnect-ui'
+        });
+
+        let currentWallet = null;
+
+        // 监听钱包连接状态
+        tonConnectUI.onStatusChange(wallet => {
+            currentWallet = wallet;
+            if (wallet) {
+                showWalletSection(wallet);
+            } else {
+                showConnectSection();
+            }
+        });
+
+        // 显示连接界面
+        function showConnectSection() {
+            document.getElementById('connectSection').classList.remove('hidden');
+            document.getElementById('walletSection').classList.add('hidden');
+        }
+
+        // 显示钱包界面
+        function showWalletSection(wallet) {
+            document.getElementById('connectSection').classList.add('hidden');
+            document.getElementById('walletSection').classList.remove('hidden');
+            
+            // 显示钱包地址
+            const address = wallet.account.address;
+            document.getElementById('walletAddress').textContent = formatAddress(address);
+            
+            // 获取余额
+            refreshBalance();
+        }
+
+        // 格式化地址显示
+        function formatAddress(address) {
+            return address.slice(0, 8) + '...' + address.slice(-8);
+        }
+
+        // 刷新余额
+        async function refreshBalance() {
+            if (!currentWallet) return;
+            
+            const balanceElement = document.getElementById('balance');
+            balanceElement.innerHTML = '<span class="loading"></span> 查询余额中...';
+            
+            try {
+                // 这里使用TON API查询余额
+                // 注意：这是一个简化的示例，实际应用中需要使用正确的API
+                const response = await fetch(`https://toncenter.com/api/v2/getAddressBalance?address=${currentWallet.account.address}`, {
+                    headers: {
+                        'X-API-Key': 'your-api-key-here' // 替换为你的API密钥
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const balance = (parseInt(data.result) / 1000000000).toFixed(4); // 转换为TON
+                    balanceElement.textContent = `${balance} TON`;
+                } else {
+                    throw new Error('Failed to fetch balance');
+                }
+            } catch (error) {
+                console.error('Error fetching balance:', error);
+                balanceElement.textContent = '余额查询失败';
+                // 备用方案：显示模拟余额
+                setTimeout(() => {
+                    balanceElement.textContent = '~ TON (演示模式)';
+                }, 1000);
+            }
+        }
+
+        // 发送交易
+        async function sendTransaction() {
+            const recipient = document.getElementById('recipient').value;
+            const amount = document.getElementById('amount').value;
+            
+            if (!recipient || !amount || !currentWallet) {
+                showStatus('请填写完整信息', 'error');
+                return;
+            }
+
+            if (parseFloat(amount) <= 0) {
+                showStatus('金额必须大于0', 'error');
+                return;
+            }
+
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<span class="loading"></span> 发送中...';
+
+            try {
+                const transaction = {
+                    validUntil: Math.floor(Date.now() / 1000) + 300, // 5分钟后过期
+                    messages: [
+                        {
+                            address: recipient,
+                            amount: (parseFloat(amount) * 1000000000).toString(), // 转换为nanotons
+                            payload: '' // 可选的消息
+                        }
+                    ]
+                };
+
+                const result = await tonConnectUI.sendTransaction(transaction);
+                
+                if (result) {
+                    showStatus(`交易成功发送！Hash: ${result.boc.slice(0, 16)}...`, 'success');
+                    // 清空表单
+                    document.getElementById('recipient').value = '';
+                    document.getElementById('amount').value = '';
+                    // 刷新余额
+                    setTimeout(refreshBalance, 2000);
+                } else {
+                    throw new Error('Transaction failed');
+                }
+            } catch (error) {
+                console.error('Transaction error:', error);
+                showStatus('交易失败: ' + error.message, 'error');
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.textContent = '发送';
+            }
+        }
+
+        // 显示状态消息
+        function showStatus(message, type) {
+            const statusElement = document.getElementById('statusMessage');
+            statusElement.innerHTML = `<div class="status ${type}">${message}</div>`;
+            
+            // 3秒后自动清除消息
+            setTimeout(() => {
+                statusElement.innerHTML = '';
+            }, 3000);
+        }
+
+        // 断开连接
+        async function disconnect() {
+            await tonConnectUI.disconnect();
+        }
+
+        // 页面加载时检查连接状态
+        window.addEventListener('load', () => {
+            // 检查是否已经连接
+            if (tonConnectUI.wallet) {
+                showWalletSection(tonConnectUI.wallet);
+            } else {
+                showConnectSection();
+            }
+        });
+
+        // Telegram Web App特定功能
+        if (tg) {
+            // 设置主题颜色
+            tg.setHeaderColor('#0088cc');
+            
+            // 监听主题变化
+            tg.onEvent('themeChanged', () => {
+                console.log('Theme changed');
+            });
+            
+            // 监听视窗变化
+            tg.onEvent('viewportChanged', () => {
+                console.log('Viewport changed');
+            });
+        }
+    </script>
+</body>
+</html>

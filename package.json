@@ -1,0 +1,21 @@
+{
+  "name": "ton-telegram-mini-app",
+  "version": "1.0.0",
+  "description": "A simple TON blockchain mini app for Telegram",
+  "main": "index.js",
+  "scripts": {
+    "start": "http-server public -p 3000 -c-1",
+    "dev": "http-server public -p 3000 -c-1 --cors",
+    "build": "echo 'Build complete'",
+    "test": "echo 'No tests specified'"
+  },
+  "keywords": ["ton", "telegram", "mini-app", "blockchain", "dapp"],
+  "author": "Your Name",
+  "license": "MIT",  "dependencies": {
+    "@tonconnect/ui": "^2.0.0",
+    "@tonconnect/sdk": "^3.0.0"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Icon Generator</title>
+    <style>
+        canvas { border: 1px solid #ccc; margin: 20px; }
+        .container { text-align: center; padding: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>TON App Icon Generator</h1>
+        <canvas id="iconCanvas" width="256" height="256"></canvas>
+        <br>
+        <button onclick="downloadIcon()">下载图标</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('iconCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // 绘制TON应用图标
+        function drawIcon() {
+            // 背景渐变
+            const gradient = ctx.createLinearGradient(0, 0, 256, 256);
+            gradient.addColorStop(0, '#0088cc');
+            gradient.addColorStop(1, '#0066aa');
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 256, 256);
+            
+            // 圆角效果
+            ctx.globalCompositeOperation = 'destination-in';
+            ctx.beginPath();
+            ctx.roundRect(0, 0, 256, 256, 40);
+            ctx.fill();
+            
+            ctx.globalCompositeOperation = 'source-over';
+            
+            // TON文字
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 72px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('TON', 128, 128);
+            
+            // 小装饰
+            ctx.fillStyle = 'rgba(255,255,255,0.3)';
+            ctx.beginPath();
+            ctx.arc(200, 60, 20, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function downloadIcon() {
+            const link = document.createElement('a');
+            link.download = 'ton-app-icon.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+
+        // CanvasRenderingContext2D.roundRect polyfill
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, width, height, radius) {
+                this.beginPath();
+                this.moveTo(x + radius, y);
+                this.lineTo(x + width - radius, y);
+                this.quadraticCurveTo(x + width, y, x + width, y + radius);
+                this.lineTo(x + width, y + height - radius);
+                this.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+                this.lineTo(x + radius, y + height);
+                this.quadraticCurveTo(x, y + height, x, y + height - radius);
+                this.lineTo(x, y + radius);
+                this.quadraticCurveTo(x, y, x + radius, y);
+                this.closePath();
+            };
+        }
+
+        drawIcon();
+    </script>
+</body>
+</html>
